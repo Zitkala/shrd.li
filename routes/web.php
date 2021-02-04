@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Response;
+
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 /*
@@ -13,7 +15,9 @@
 |
 */
 
-$router->get('asdasd', function () {
-    return 'Hello World';
+$router->get('monitor', function () {
+    return response()->json([
+        'found' => true,
+    ], Response::HTTP_OK);
 });
 $router->get('/{slug}', 'RedirectController@show');
