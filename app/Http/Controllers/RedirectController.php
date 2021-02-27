@@ -19,10 +19,11 @@ class RedirectController extends Controller
 
         if ($url) {
             $fields = [
-                'referer'   => $request->headers->get('referer'),
-                'userIp'    => Crypt::encrypt($request->ip()),
-                'userMac'   => Crypt::encrypt($this->getMAcAddressExec()),
-                'userAgent' => Crypt::encrypt($request->server('HTTP_USER_AGENT')),
+                'link_id'    => $url->id,
+                'referer'    => $request->headers->get('referer'),
+                'user_ip'    => Crypt::encrypt($request->ip()),
+                'user_mac'   => Crypt::encrypt($this->getMAcAddressExec()),
+                'user_agent' => Crypt::encrypt($request->server('HTTP_USER_AGENT')),
             ];
 
             $check = ShortenedLinkImpressions::where($fields)->where('created_at', '>', Carbon::now()->subHours(4))->first('id');
