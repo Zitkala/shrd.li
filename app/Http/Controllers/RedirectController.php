@@ -6,7 +6,6 @@ use App\Models\ShortenedLink;
 use App\Models\ShortenedLinkImpressions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 class RedirectController extends Controller
@@ -21,9 +20,9 @@ class RedirectController extends Controller
             $fields = [
                 'link_id'    => $url->id,
                 'referer'    => $request->headers->get('referer'),
-                'user_ip'    => Crypt::encrypt($request->ip()),
-                'user_mac'   => Crypt::encrypt($this->getMAcAddressExec()),
-                'user_agent' => Crypt::encrypt($request->server('HTTP_USER_AGENT')),
+                'user_ip'    => md5($request->ip()),
+                'user_mac'   => md5($this->getMAcAddressExec()),
+                'user_agent' => md5($request->server('HTTP_USER_AGENT')),
             ];
 
             $check = ShortenedLinkImpressions::where($fields)->where('created_at', '>', Carbon::now()->subHours(4))->first('id');
