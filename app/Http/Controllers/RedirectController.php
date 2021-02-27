@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\ShortenedLink;
+use App\Models\ShortenedLinkImpressions;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Date;
 
 class RedirectController extends Controller
 {
@@ -17,14 +18,16 @@ class RedirectController extends Controller
         $url = ShortenedLink::where('path_hash', $hash)->first();
 
         if ($url) {
-            $referer = $request->headers->get('referer');
-            $userIp = $request->ip();
-            $userMac = $this->getMAcAddressExec();
-            $userAgent = $request->server('HTTP_USER_AGENT');
+            $fields = [
+                'referer'   => $request->headers->get('referer'),
+                'userIp'    => Crypt::encrypt($request->ip()),
+                'userMac'   => Crypt::encrypt($this->getMAcAddressExec()),
+                'userAgent' => Crypt::encrypt($request->server('HTTP_USER_AGENT')),
+            ];
 
-            $key = md5($referer.$url->path).'-'.md5($userIp.$userMac.$userAgent);
-            if (!Cache::has($key)) {
-                Cache::put('ref-'.$key, Date::now()->toString(), 3600);
+            $check = ShortenedLinkImpressions::where($fields)->where('created_at', '>', Carbon::now()->subHours(4))->first('id');
+            if (!$check) {
+                ShortenedLinkImpressions::create($fields);
                 $url->update(['impressions' => DB::raw('impressions+1')]);
             }
 
