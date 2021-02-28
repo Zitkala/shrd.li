@@ -20,4 +20,5 @@ $router->get('monitor', function () {
         'found' => true,
     ], Response::HTTP_OK);
 });
+$router->get('/{slug}/qr/{format}', 'RedirectController@qrCode');
 $router->get('/{slug}', 'RedirectController@show');
